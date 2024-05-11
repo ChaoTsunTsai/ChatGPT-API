@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Chat Page";
+}
+
+<h2>Chat with GPT</h2>
+
+<textarea class="chat-input" name="userMessage" rows="5" cols="50" required></textarea>
+<br />
+<button class="send-button" onclick="sendMessage()">Send</button>
+
+<div id="chatHistory" class="chat-history"></div>
+<script>
+function appendMessage(role, text) {
+    const msgElement = document.createElement('div');
+    msgElement.classList.add('message', role);  // 'user' 或 'system' 角色
+    msgElement.textContent = text;
+    const chatHistory = document.getElementById('chatHistory');
+    chatHistory.appendChild(msgElement);
+
+    // 滚动到最新消息
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+function sendMessage() {
+    var userMessage = $('textarea[name="userMessage"]').val();  // 获取用户输入的消息
+    if (userMessage.trim() === '') {
+        alert('Please enter a message.');
+        return;
+    }
+
+    $.ajax({
+        type: "POST",
+        url: '@Url.Action("SendMessage", "Chat")',  // 确保这里的 URL 是正确配置的
+        data: { userMessage: userMessage },
+        success: function(response) {
+            appendMessage('user', userMessage);  // 添加用户消息
+            appendMessage('system', response);   // 添加系统回复
+            $('textarea[name="userMessage"]').val(''); // 清空输入框
+        },
+        error: function(xhr, status, error) {
+            console.error("Error: " + error);
+        }
+    });
+}
+</script>
